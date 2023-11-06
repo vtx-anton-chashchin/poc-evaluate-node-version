@@ -4,6 +4,18 @@ Investigate how to ensure that proper node.js version is enforced.
 Reference:
 https://nodejs.dev/en/about/releases/
 
+## How to run
+
+In general
+```bash
+npm run check <NODE_VERSION>
+```
+
+Example
+```bash
+npm run check v20.9.0
+```
+
 ## Acceptance Criteria
 
 - Determine what version of node MFEs must be on at any given time. Provide reasoning for which node versions to "warn on" and which versions to "error on".
@@ -78,8 +90,8 @@ Example:
   { "version": "21.0.0", "lts": false, "security": false },
 
   { "version": "20.0.3", "lts": "Iron", "security": false },
-  { "version": "20.0.2", "lts": "Iron", "security": false },
-  { "version": "20.0.1", "lts": "Iron", "security": true },
+  { "version": "20.0.2", "lts": "Iron", "security": true },
+  { "version": "20.0.1", "lts": "Iron", "security": false },
   { "version": "20.0.0", "lts": false, "security": true },
 
   { "version": "19.0.3", "lts": false, "security": false },
@@ -109,8 +121,8 @@ Example:
 ```json
 [
   { "version": "20.0.3", "lts": "Iron", "security": false },
-  { "version": "20.0.2", "lts": "Iron", "security": false },
-  { "version": "20.0.1", "lts": "Iron", "security": true },
+  { "version": "20.0.2", "lts": "Iron", "security": true },
+  { "version": "20.0.1", "lts": "Iron", "security": false },
 
   { "version": "18.0.3", "lts": "Hydrogen", "security": false },
   { "version": "18.0.2", "lts": "Hydrogen", "security": true },
@@ -126,26 +138,31 @@ Example:
 
 ```json
 [
+  // Active LTS
   { "version": "20.0.3", "lts": "Iron", "security": false },
-  { "version": "20.0.2", "lts": "Iron", "security": false },
-  { "version": "20.0.1", "lts": "Iron", "security": true },
+  { "version": "20.0.2", "lts": "Iron", "security": true },
+  { "version": "20.0.1", "lts": "Iron", "security": false },
 
+  // Maintenance LTS
   { "version": "18.0.3", "lts": "Hydrogen", "security": false },
   { "version": "18.0.2", "lts": "Hydrogen", "security": true },
   { "version": "18.0.1", "lts": "Hydrogen", "security": false }
 ]
 ```
 
-3. Keep only releases after last security update (including it)
+3. Mark all releases of Active LTS after the latest security fixes release (including it) as OK, all other as WARN
 
 ```json
 [
-  { "version": "20.0.3", "lts": "Iron", "security": false },
-  { "version": "20.0.2", "lts": "Iron", "security": false },
-  { "version": "20.0.1", "lts": "Iron", "security": true },
+  // Active LTS
+  { "version": "20.0.3", "lts": "Iron", "security": false }, // secure
+  { "version": "20.0.2", "lts": "Iron", "security": true }, // secure
+  { "version": "20.0.1", "lts": "Iron", "security": false }, // unsecure
 
-  { "version": "18.0.3", "lts": "Hydrogen", "security": false },
-  { "version": "18.0.2", "lts": "Hydrogen", "security": true }
+  // Maintenance LTS
+  { "version": "18.0.3", "lts": "Hydrogen", "security": false }, // secure
+  { "version": "18.0.2", "lts": "Hydrogen", "security": true }, // secure
+  { "version": "18.0.1", "lts": "Hydrogen", "security": false } // unsecure
 ]
 ```
 
@@ -153,16 +170,13 @@ Example:
 
 ```ts
 {
-  required: [
-    { from: '20.0.1', to: '20.0.3' },
-    { from: '18.0.2', to: '18.0.3' },
-  ],
-  recommended: '20.0.3',
+  required: ["20.0.3", "20.0.2", "20.0.1", "18.0.3", "18.0.2", "18.0.1"],
+  recommended: ["20.0.3", "20.0.2", "18.0.3", "18.0.2"]
 }
 ```
 
 ### 3. Classify node.js version into 3 groups, like "ok", "warn", "error"
 
-- out of required ranges - "error"
-- in required ranges but not equal recommended - "warn"
-- equal to recommended - "ok"
+- out of required range - "error"
+- in required ranges but not in recommended range - "warn"
+- in recommended range - "ok"

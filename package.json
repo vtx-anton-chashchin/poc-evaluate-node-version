@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src",
+    "check": "ts-node src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Anton Chashchin",
   "license": "UNLICENSED",
-  "devDependencies": {
+  "dependencies": {
     "@tsconfig/node20": "^20.1.2",
     "ts-node": "^10.9.1"
   }

@@ -1,42 +1,13 @@
-import { getLtsReleases } from './getLtsReleases'
 import { getReleases } from './getReleases'
-import { getSafeRange } from './getSafeRange'
-import { getStatus } from './getStatus'
-import { splitByLastMajor } from './splitByLastMajor'
-import { Result } from './types'
-import { parse, stringify } from './version'
+import { parse } from './parse'
+import { score } from './score'
 
-export const main = async (rawVersion: string): Promise<Result> => {
+export const main = async (version: string) => {
   const releases = await getReleases()
 
-  const lts = getLtsReleases(releases)
+  const classifiedReleases = parse(releases)
 
-  const { last: currentLts, other } = splitByLastMajor(lts)
-  const { last: previousLts } = splitByLastMajor(other)
-
-  const current = getSafeRange(currentLts)
-  const previous = getSafeRange(previousLts)
-
-  const version = parse(rawVersion)
-
-  const criteria = {
-    recommended: stringify(current.to),
-    required: [
-      {
-        from: stringify(current.from),
-        to: stringify(current.to),
-      },
-      {
-        from: stringify(previous.from),
-        to: stringify(previous.to),
-      },
-    ],
-  }
-
-  return {
-    status: getStatus({ version, current, previous }),
-    criteria,
-  }
+  return score(classifiedReleases, version)
 }
 
-main('v20.9.0').then((r) => console.log(JSON.stringify(r, null, 2)))
+main(process.argv[2]).then(console.log)
